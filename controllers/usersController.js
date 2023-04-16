@@ -102,14 +102,28 @@ const seed = async (req, res) => {
 
 const index = async (req, res) => {
   try {
-    const {_start, _end}=req.query;
+
+    const {_start, _end} = req.query;
+
+    function convert(_start, _end){
+      const start = parseInt(_start,10);
+      const end = parseInt(_end,10);
+
+      const page = start+1; // the page number you want to fetch
+      const limit = end-start; // the number of documents per page
+      const skip = start;
+
+      return {skip, limit}
+    }
+
     console.log(req.query, _start, _end)
+// .populate('courses_id')
+
     if (_start || _end){
-      const page = _start+1; // the page number you want to fetch
-      const limit = _end-_start; // the number of documents per page
-      const skip = (page-1) * limit;
-      User.find({}).skip(skip).limit(limit).populate('courses_id')
-        .then(foundUsers=>{
+      const {skip, limit}=convert(_start,_end);
+      console.log(skip, limit);
+      User.find({}).skip(skip).limit(limit)
+         .then(foundUsers=>{
           res.status(200).json(foundUsers);
          })
          .catch(error=>{
