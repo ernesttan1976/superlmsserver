@@ -6,19 +6,25 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const SALT_ROUNDS = 6;
 
 const create = async (req, res) => {
-  const { password } = req.body;
-  if (password.length < 5) {
-    res.status(400).json({ message: "Password is too Short, Please Try Again." });
+  try {
+
+    const { name, email, password, avatar } = req.body;
+  if (!name) return res.status(400).send("Name is required");
+
+  if (!password || password.length < 5) {
+    res.status(400).json({ message: "Password is required and min 4 characters." });
     return;
   }
 
-  try {
+    let emailFound = await User.findOne({email}).exec();
+    if (emailFound) return res.status(400).send("This email is already taken");
+
     const user = await User.create(req.body);
     if (!user.avatar) {
       user.avatar = faker.image.avatar();
     }
     const payload = { user };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: 60 }); // 1hr
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: 6000 }); // 1hr
     res.status(201).json(token);
   } catch (error) {
     res.status(500).json(error);
@@ -65,7 +71,7 @@ const seed = async (req, res) => {
       name: `admin`,
       email: `admin@ga.co`,
       password: await bcrypt.hash(`admin`, SALT_ROUNDS),
-      userRole: 'Admin',
+      role: ['Admin','Instructor','Student'],
       avatar: RandomAvatar(),
     });
     userItems.push(adminUser);
@@ -75,7 +81,7 @@ const seed = async (req, res) => {
         name: `${faker.name.firstName()} ${faker.name.lastName()}`,
         email: `instructor${i}@ga.co`,
         password: await bcrypt.hash(`instructor${i}`, SALT_ROUNDS),
-        userRole: 'Instructor',
+        role: ['Instructor','Student'],
         avatar: RandomAvatar(),
       });
       userItems.push(instructorUser);
@@ -86,7 +92,7 @@ const seed = async (req, res) => {
         name: `${faker.name.firstName()} ${faker.name.lastName()}`,
         email: `student${i}@ga.co`,
         password: await bcrypt.hash(`student${i}`, SALT_ROUNDS),
-        userRole: 'Student',
+        role: ['Student'],
         avatar: RandomAvatar(),
       });
       userItems.push(userItem);

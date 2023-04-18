@@ -64,8 +64,8 @@ const seed = async (req, res) => {
 
     //for the courses assign assign instructors
     const courseData = await Course.find({});
-    const instructorsData = await User.find({userRole: 'Instructor'});
-    const studentsData = await User.find({userRole: 'Student'});
+    const instructorsData = await User.find({role: ["Instructor","Student"] });
+    const studentsData = await User.find({role: ["Student"]});
     let instructorIndex =  0;
     let studentsIndex = 0;
     for (let i=0; i<courseData.length; i++){
