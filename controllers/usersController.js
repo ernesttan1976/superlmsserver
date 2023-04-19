@@ -71,7 +71,7 @@ const seed = async (req, res) => {
       name: `admin`,
       email: `admin@ga.co`,
       password: await bcrypt.hash(`admin`, SALT_ROUNDS),
-      role: ['Admin','Instructor','Student'],
+      role: 'Admin',
       avatar: RandomAvatar(),
     });
     userItems.push(adminUser);
@@ -81,7 +81,7 @@ const seed = async (req, res) => {
         name: `${faker.name.firstName()} ${faker.name.lastName()}`,
         email: `instructor${i}@ga.co`,
         password: await bcrypt.hash(`instructor${i}`, SALT_ROUNDS),
-        role: ['Instructor','Student'],
+        role: 'Instructor',
         avatar: RandomAvatar(),
       });
       userItems.push(instructorUser);
@@ -92,7 +92,7 @@ const seed = async (req, res) => {
         name: `${faker.name.firstName()} ${faker.name.lastName()}`,
         email: `student${i}@ga.co`,
         password: await bcrypt.hash(`student${i}`, SALT_ROUNDS),
-        role: ['Student'],
+        role: 'Student',
         avatar: RandomAvatar(),
       });
       userItems.push(userItem);
@@ -109,7 +109,17 @@ const seed = async (req, res) => {
 const index = async (req, res) => {
   try {
 
-    const {_start, _end} = req.query;
+    const {_start, _end, idArray} = req.query;
+
+    if (idArray){
+      User.find({_id: {$in: idArray}})
+      .then(foundUsers=>{
+       res.status(200).json(foundUsers);
+      })
+      .catch(error=>{
+       res.status(400).json({ error: error.message });
+      })
+    }
 
     function convert(_start, _end){
       const start = parseInt(_start,10);
@@ -122,12 +132,8 @@ const index = async (req, res) => {
       return {skip, limit}
     }
 
-    console.log(req.query, _start, _end)
-// .populate('courses_id')
-
     if (_start || _end){
       const {skip, limit}=convert(_start,_end);
-      console.log(skip, limit);
       User.find({}).skip(skip).limit(limit)
          .then(foundUsers=>{
           res.status(200).json(foundUsers);

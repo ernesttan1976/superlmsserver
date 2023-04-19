@@ -10,6 +10,8 @@ database.connect();
 const userRouter = require("./routes/usersRouter");
 const courseRouter = require("./routes/coursesRouter");
 const completionRouter = require("./routes/completionsRouter");
+const openaiRouter = require('./routes/openaiRouter');
+const s3Router = require('./routes/s3Router');
 
 const jwt = require("jsonwebtoken");
 
@@ -46,9 +48,32 @@ const isLoggedIn = (req, res, next) => {
 //   res.json({ user });
 // });
 
+const corsOptions = {
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Type", "Authorization"],
+};
+
+function optionsMiddleware(req, res, next) {
+  if (req.method === "OPTIONS" && (req.path === "/users" || req.path === "/courses")) {
+      res.set({
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          ...corsOptions,
+      });
+      res.status(204).end();
+  } else {
+      next();
+  }
+}
+
+app.use(optionsMiddleware);
+
 app.use("/users", userRouter);
 app.use("/courses", courseRouter);
 app.use("/completions", completionRouter);
+app.use("/openai", openaiRouter);
+app.use('/media', s3Router);
 
 // app.get("/*", function (req, res) {
 //   res.sendFile(path.join(__dirname, "dist", "index.html"));

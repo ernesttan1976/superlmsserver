@@ -5,10 +5,20 @@ const User = require("../models/User");
 const index = async (req, res) => {
     try {
       //http://127.0.0.1/courses?_end=10&_start=0
-      const {_start, _end} = req.query;
-      // if (id) {
-      //   return res.status(400).json({ error: "Cannot call id as query" });
-      // }
+      const {_start, _end, idArray} = req.query;
+      if (idArray) {
+        Course.find({_id: {$in: idArray}})
+        .populate('instructor_id')
+        .populate('students_id')
+        .populate('lessons_id')
+        .populate('discussions_id')
+        .then(foundCourses=>{
+          res.status(200).json(foundCourses);
+         })
+         .catch(error=>{
+          res.status(400).json({ error: error.message });
+         })
+      }
 
       function convert(_start, _end){
         const start = parseInt(_start,10);
@@ -64,8 +74,8 @@ const seed = async (req, res) => {
 
     //for the courses assign assign instructors
     const courseData = await Course.find({});
-    const instructorsData = await User.find({role: ["Instructor","Student"] });
-    const studentsData = await User.find({role: ["Student"]});
+    const instructorsData = await User.find({role: "Instructor" });
+    const studentsData = await User.find({role: "Student"});
     let instructorIndex =  0;
     let studentsIndex = 0;
     for (let i=0; i<courseData.length; i++){
@@ -130,6 +140,20 @@ const update = async (req, res) => {
   }
 };
 
+const updatePatch = async (req, res) => {
+  try {
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.status(200).json(updatedCourse);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
 module.exports = {
   create,
   seed,
@@ -137,4 +161,5 @@ module.exports = {
   delete: deleteCourse,
   show,
   update,
+  updatePatch,
 };

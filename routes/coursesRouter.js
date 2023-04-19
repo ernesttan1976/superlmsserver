@@ -10,6 +10,6 @@ router.post("/", courseController.create);
 router.get("/:id", courseController.show);
 router.delete("/:id", courseController.delete);
 router.put("/:id", courseController.update);
-
+router.patch("/:id", courseController.updatePatch);
 
 module.exports = router;
