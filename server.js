@@ -20,7 +20,7 @@ const port = process.env.PORT || 3001;
 
 app.use(logger("dev"));
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit: '20mb'}));
 // app.use(express.static(path.join(__dirname, "dist")));
 
 // app.get("/api", (req, res) => {

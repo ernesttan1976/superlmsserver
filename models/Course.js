@@ -9,8 +9,8 @@ const discussionSchema = new Schema(
       trim: true,
     },
     user_id: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   },
   {
@@ -92,9 +92,15 @@ const coursesSchema = new Schema(
       },
     },
 
+    price: {
+      type: Number,
+      get: (v) => parseFloat(v).toFixed(2),
+      set: (v) => parseFloat(v).toFixed(2)
+    },
+
     instructor_id: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
 
     students_id: [{

@@ -5,6 +5,7 @@ const coursesSeed = [
     "image": "https://i.ytimg.com/vi/jBmrduvKl5w/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAlV5w49TUHYevR-hne7kUvjHrxzw",
     "startDate": new Date('2022-03-24T00:00:00'),
     "endDate": new Date('2099-03-24T00:00:00'),
+    "price" : "15.98",
     "lessons_id":[
         {
             "title": "How To Build Your First TypeScript Project - TODO List Application",
@@ -121,6 +122,7 @@ const coursesSeed = [
 "image": "https://i.ytimg.com/vi/6h649f2fB9Q/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLBKt2MBs1wWUJD2-BUyHdrJwwhv2g",
 "startDate": new Date('2023-01-17T00:00:00'),
 "endDate": new Date('2099-01-17T00:00:00'),
+"price" : "24.98",
 "lessons_id":[
     {
         "title": "Next.js Tutorial for Beginners | Next.js 13",
@@ -193,6 +195,7 @@ const coursesSeed = [
     "image": "https://i.ytimg.com/vi/O6P86uwfdR0/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLCjFfkCaia8DcMnohwQGVE9KfbciQ",
     "startDate": new Date('2020-04-06T00:00:00'),
     "endDate": new Date('2099-04-06T00:00:00'),
+    "price" : "19.98",
     "lessons_id":[
         {
             "title": "Learn useState In 15 Minutes - React Hooks Explained",
