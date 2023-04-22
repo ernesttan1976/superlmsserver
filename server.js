@@ -19,7 +19,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(logger("dev"));
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['x-total-count','nextPage','previousPage']
+}));
 app.use(express.json({limit: '20mb'}));
 // app.use(express.static(path.join(__dirname, "dist")));
 

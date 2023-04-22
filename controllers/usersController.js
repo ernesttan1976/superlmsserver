@@ -106,6 +106,8 @@ const seed = async (req, res) => {
   }
 };
 
+
+
 const index = async (req, res) => {
   try {
 
@@ -125,17 +127,31 @@ const index = async (req, res) => {
       const start = parseInt(_start,10);
       const end = parseInt(_end,10);
 
-      const page = start+1; // the page number you want to fetch
+      const page2 = start+1; // the page number you want to fetch
       const limit = end-start; // the number of documents per page
-      const skip = start;
+      const page = start;
 
-      return {skip, limit}
+      return {page, limit}
     }
 
     if (_start || _end){
-      const {skip, limit}=convert(_start,_end);
-      User.find({}).skip(skip).limit(limit)
+      const total = await User.countDocuments({});
+      const {page, limit}=convert(_start,_end);
+      User.find({}).skip(page).limit(limit)
          .then(foundUsers=>{
+            
+            res.set('x-total-count', total); //set the header to indicate x-total-count
+            const startIndex = (page - 1) * limit;
+            const endIndex = page * limit;
+            const previousPage = page > 1 ? page - 1 : null; // Set previous page number or null if on first page
+            const nextPage = endIndex < total ? page + 1 : null; // Set next page number or null if on last page
+            if (previousPage !== null) {
+              res.set('previousPage', previousPage);
+            }
+            if (nextPage !== null) {
+              res.set('nextPage', nextPage);
+            }
+
           res.status(200).json(foundUsers);
          })
          .catch(error=>{
