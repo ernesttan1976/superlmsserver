@@ -140,7 +140,10 @@ const deleteCourse = async (req, res) => {
 const show = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
-    //.populate("artworks");
+    .populate('instructor_id')
+    .populate('students_id')
+    .populate('lessons_id')
+    .populate('discussions_id')
     res.status(200).json(course);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -162,12 +165,32 @@ const update = async (req, res) => {
 
 const updatePatch = async (req, res) => {
   try {
-    const updatedCourse = await Course.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true }
-    );
-    res.status(200).json(updatedCourse);
+    console.log("Patch", req.params.id, req.body)
+    if (req.body.lessons_id){
+      const updatedCourse = await Course.findById(req.params.id)
+      console.log("Before patch", updatedCourse.lessons_id);
+      const updatedLessons = [...updatedCourse.lessons_id];
+      req.body.lessons_id.forEach(
+        (lesson, index)=>{
+          if (lesson===null){
+            //nothing skip
+          } else {
+            updatedLessons[index]={...lesson}
+          }
+        }
+      )
+      updatedCourse.lessons_id = updatedLessons;
+      console.log("After patch", updatedCourse.lessons_id);
+      // updatedCourse.save();
+      res.status(200).json(updatedCourse);
+    } else {
+      const updatedCourse = await Course.findByIdAndUpdate(
+        req.params.id,
+        { $set: req.body },
+        { new: true }
+      );
+      res.status(200).json(updatedCourse);
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
