@@ -165,10 +165,10 @@ const update = async (req, res) => {
 
 const updatePatch = async (req, res) => {
   try {
-    console.log("Patch", req.params.id, req.body)
-    if (req.body.lessons_id){
+    if (req.body.lessons_id && !req.body.title){
+      //editing the lessons
+      console.log("editing lessons")
       const updatedCourse = await Course.findById(req.params.id)
-      console.log("Before patch", updatedCourse.lessons_id);
       const updatedLessons = [...updatedCourse.lessons_id];
       req.body.lessons_id.forEach(
         (lesson, index)=>{
@@ -179,11 +179,29 @@ const updatePatch = async (req, res) => {
           }
         }
       )
-      updatedCourse.lessons_id = updatedLessons;
-      console.log("After patch", updatedCourse.lessons_id);
-      // updatedCourse.save();
-      res.status(200).json(updatedCourse);
-    } else {
+      updatedCourse.lessons_id = [...updatedLessons];
+      const updatedCourse2 = await Course.findByIdAndUpdate(req.params.id, updatedCourse)
+      res.status(200).json(updatedCourse2);
+    } else if (req.body.lessons_id && req.body.title){
+      //editing the course only
+      console.log("editing course")
+      delete req.body.lessons_id
+      const updatedCourse = await Course.findById(req.params.id)      
+      updatedCourse.title = req.body.title || updatedCourse.title;
+      updatedCourse.description = req.body.description || updatedCourse.description;
+      updatedCourse.startDate = req.body.startDate || updatedCourse.startDate;
+      updatedCourse.endDate = req.body.endDate || updatedCourse.endDate;
+      updatedCourse.image = req.body.image || updatedCourse.image;
+      updatedCourse.instructor_id = req.body.instructor_id || updatedCourse.instructor_id;
+      
+      const updatedCourse2 = await Course.findByIdAndUpdate(req.params.id, updatedCourse)
+      console.log("req.body",req.body)
+      console.log("updatedCourse",updatedCourse)
+      console.log("updatedCourse2",updatedCourse2)
+
+      res.status(200).json(updatedCourse2);
+
+    } else  {
       const updatedCourse = await Course.findByIdAndUpdate(
         req.params.id,
         { $set: req.body },
