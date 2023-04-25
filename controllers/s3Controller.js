@@ -1,78 +1,137 @@
-const AWS = require('aws-sdk');
-const fs = require('fs');
+const AWS = require("aws-sdk");
+const { nanoid } = require("nanoid");
+const { readFileSync } = require("fs");
+
+// const stripe = require("stripe")(process.env.STRIPE_SECRET);
+
+const awsConfig = {
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY,
+  region: process.env.AWS_BUCKET_REGION,
+  apiVersion: process.env.AWS_API_VERSION,
+};
+const S3 = new AWS.S3(awsConfig);
 
 const bucketName = process.env.AWS_BUCKET_NAME;
-const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_KEY;
 
-const s3Client = new AWS.S3({
-  region,
-  accessKeyId,
-  secretAccessKey
-});
-
-function detectContentType(file) {
-  const extension = file.split('.').pop();
-  switch (extension) {
-    case 'jpeg':
-    case 'jpg':
-    case 'png':
-    case 'gif':
-      return 'image/*';
-    case 'pdf':
-    case 'doc':
-    case 'docx':
-    case 'txt':
-      return 'application/*';
-    case 'mp4':
-    case 'avi':
-    case 'mkv':
-      return 'video/*';
-    default:
-      return 'application/octet-stream';
-  }
-}
-
-async function uploadFile(req, res) {
+const uploadVideo = async (req, res) => {
   try {
-    console.log("Upload file", req.file)
-    const file = req.file;
-    const key = file.originalname;
-    const fileStream = await fs.createReadStream(`${file.destination}${file.filename}`);
-    const contentType = detectContentType(file.originalname);
-    const uploadParams = {
+    const { video } = req.files;
+    console.log(req);
+    if (!video) return res.status(400).send("No video");
+
+    // video params
+    const params = {
       Bucket: bucketName,
-      Body: fileStream,
-      Key: file.filename,
-      ContentType: contentType
+      Key: `${nanoid()}.${video.type.split("/")[1]}`,
+      Body: readFileSync(video.path),
+      ACL: "public-read",
+      ContentType: video.type,
     };
-    console.log(uploadParams)
 
-    const result = await s3Client.upload(uploadParams);
-    res.status(200).json({ result: result, url: `https://${uploadParams.Bucket}.s3.amazonaws.com/${uploadParams.Key}` });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({ error: error })
+    // upload to s3
+    S3.upload(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      }
+      console.log(data);
+      res.send(data);
+    });
+  } catch (err) {
+    console.log(err);
   }
-}
+};
 
-async function deleteFile(req, res, next) {
-  const key = req.params.key;
-  console.log("Delete file", req.params)
-  const deleteParams = {
-    Key: key,
-    Bucket: bucketName,
-  };
+const removeVideo = async (req, res) => {
   try {
-    await s3Client.deleteObject(deleteParams).promise();
-    res.json({ message: "File deleted" });
-  } catch (error) {
-    res.status(500).send({ error: error })
+
+    const { key } = req.params;
+    // console.log("VIDEO REMOVE =====> ", req.body);
+
+    // video params
+    const params = {
+      Bucket: bucketName,
+      Key: key,
+    };
+
+    // upload to s3
+    S3.deleteObject(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      }
+      console.log(data);
+      res.send({ ok: true });
+    });
+  } catch (err) {
+    console.log(err);
   }
-}
+};
+
+const uploadImage = async (req, res) => {
+  // console.log(req.body);
+  try {
+    const { image } = req.body;
+    if (!image) return res.status(400).send("No image");
+
+    // prepare the image
+    const base64Data = new Buffer.from(
+      image.replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
+
+    const type = image.split(";")[0].split("/")[1];
+
+    // image params
+    const params = {
+      Bucket: bucketName,
+      Key: `${nanoid()}.${type}`,
+      Body: base64Data,
+      ACL: "public-read",
+      ContentEncoding: "base64",
+      ContentType: `image/${type}`,
+    };
+
+    // upload to s3
+    S3.upload(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        return res.sendStatus(400);
+      }
+      console.log(data);
+      res.send(data);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const removeImage = async (req, res) => {
+  try {
+    const { key } = req.params;
+    // image params
+    const params = {
+      Bucket: bucketName,
+      Key: key,
+    };
+
+    // send remove request to s3
+    S3.deleteObject(params, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.sendStatus(400);
+      }
+      res.send({ ok: true });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 module.exports = {
-  uploadFile,
-  deleteFile,
+  uploadImage,
+  removeImage,
+  uploadVideo,
+  removeVideo,
 };

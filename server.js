@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 const cors = require('cors');
+const fileupload = require("express-fileupload");
 
 require("dotenv").config();
 const database = require("./config/database");
@@ -15,14 +16,21 @@ const s3Router = require('./routes/s3Router');
 
 const jwt = require("jsonwebtoken");
 
+
 const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(logger("dev"));
 app.use(cors({
-  exposedHeaders: ['x-total-count','nextPage','previousPage']
+  exposedHeaders: ['x-total-count', 'nextPage', 'previousPage']
 }));
-app.use(express.json({limit: '20mb'}));
+app.use(
+  fileupload({
+    createParentPath: true,
+  }),
+);
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true }));
 // app.use(express.static(path.join(__dirname, "dist")));
 
 // app.get("/api", (req, res) => {
@@ -57,15 +65,23 @@ const corsOptions = {
 
 function optionsMiddleware(req, res, next) {
   if (req.method === "OPTIONS" && (req.path === "/users" || req.path === "/courses")) {
-      res.set({
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          ...corsOptions,
-      });
-      res.status(204).end();
+    res.set({
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      ...corsOptions,
+    });
+    res.status(204).end();
+  } else if (req.method === "OPTIONS" && req.path === "/media/video-upload") {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': "GET, POST, PUT, PATCH, DELETE",
+      'Access-Control-Allow-Headers': "Content-Type, Authorization",
+      ...corsOptions,
+    });
+    res.status(204).end();
   } else {
-      next();
+    next();
   }
 }
 
@@ -76,6 +92,8 @@ app.use("/courses", courseRouter);
 app.use("/completions", completionRouter);
 app.use("/openai", openaiRouter);
 app.use('/media', s3Router);
+
+
 
 // app.get("/*", function (req, res) {
 //   res.sendFile(path.join(__dirname, "dist", "index.html"));
