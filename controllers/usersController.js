@@ -9,14 +9,14 @@ const create = async (req, res) => {
   try {
 
     const { name, email, password, avatar } = req.body;
-  if (!name) return res.status(400).send("Name is required");
+    if (!name) return res.status(400).send("Name is required");
 
-  if (!password || password.length < 5) {
-    res.status(400).json({ message: "Password is required and min 4 characters." });
-    return;
-  }
+    if (!password || password.length < 5) {
+      res.status(400).json({ message: "Password is required and min 4 characters." });
+      return;
+    }
 
-    let emailFound = await User.findOne({email}).exec();
+    let emailFound = await User.findOne({ email }).exec();
     if (emailFound) return res.status(400).send("This email is already taken");
 
     const user = await User.create(req.body);
@@ -65,7 +65,7 @@ const seed = async (req, res) => {
 
     const userItems = [];
 
-    const RandomAvatar =()=>`https://i.pravatar.cc/100?img=${Math.floor(Math.random()*70)+1}`
+    const RandomAvatar = () => `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`
 
     const adminUser = new User({
       name: `admin`,
@@ -111,52 +111,52 @@ const seed = async (req, res) => {
 const index = async (req, res) => {
   try {
 
-    const {_start, _end, idArray} = req.query;
+    const { _start, _end, idArray } = req.query;
 
-    if (idArray){
-      User.find({_id: {$in: idArray}})
-      .then(foundUsers=>{
-       res.status(200).json(foundUsers);
-      })
-      .catch(error=>{
-       res.status(400).json({ error: error.message });
-      })
+    if (idArray) {
+      User.find({ _id: { $in: idArray } })
+        .then(foundUsers => {
+          res.status(200).json(foundUsers);
+        })
+        .catch(error => {
+          res.status(400).json({ error: error.message });
+        })
     }
 
-    function convert(_start, _end){
-      const start = parseInt(_start,10);
-      const end = parseInt(_end,10);
+    function convert(_start, _end) {
+      const start = parseInt(_start, 10);
+      const end = parseInt(_end, 10);
 
-      const page2 = start+1; // the page number you want to fetch
-      const limit = end-start; // the number of documents per page
+      const page2 = start + 1; // the page number you want to fetch
+      const limit = end - start; // the number of documents per page
       const page = start;
 
-      return {page, limit}
+      return { page, limit }
     }
 
-    if (_start || _end){
+    if (_start || _end) {
       const total = await User.countDocuments({});
-      const {page, limit}=convert(_start,_end);
+      const { page, limit } = convert(_start, _end);
       User.find({}).skip(page).limit(limit)
-         .then(foundUsers=>{
-            
-            res.set('x-total-count', total); //set the header to indicate x-total-count
-            const startIndex = (page - 1) * limit;
-            const endIndex = page * limit;
-            const previousPage = page > 1 ? page - 1 : null; // Set previous page number or null if on first page
-            const nextPage = endIndex < total ? page + 1 : null; // Set next page number or null if on last page
-            if (previousPage !== null) {
-              res.set('previousPage', previousPage);
-            }
-            if (nextPage !== null) {
-              res.set('nextPage', nextPage);
-            }
+        .then(foundUsers => {
+
+          res.set('x-total-count', total); //set the header to indicate x-total-count
+          const startIndex = (page - 1) * limit;
+          const endIndex = page * limit;
+          const previousPage = page > 1 ? page - 1 : null; // Set previous page number or null if on first page
+          const nextPage = endIndex < total ? page + 1 : null; // Set next page number or null if on last page
+          if (previousPage !== null) {
+            res.set('previousPage', previousPage);
+          }
+          if (nextPage !== null) {
+            res.set('nextPage', nextPage);
+          }
 
           res.status(200).json(foundUsers);
-         })
-         .catch(error=>{
+        })
+        .catch(error => {
           res.status(400).json({ error: error.message });
-         })
+        })
     } else {
       const foundUsers = await User.find({});
       res.status(200).json(foundUsers);
@@ -177,8 +177,38 @@ const deleteUser = async (req, res) => {
 
 const show = async (req, res) => {
   try {
-    const user= await User.findById(req.params.id).populate("courses_id");
+    const user = await User.findById(req.params.id).populate("courses_id");
     res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const getUser = async (req, res) => {
+  try {
+    //console.log("GetUser=>", req.body)
+    const userAuth = {...req.body};
+    const user = await User.findOne({ email: req.body.email }).populate("courses_id");
+
+    if (!user && userAuth.name) {
+      //console.log("User not found, creating user")
+
+      //user not found, to create user
+      const newUserData = {
+        name: userAuth.name,
+        email: userAuth.email,
+        avatar: userAuth.picture,
+        role: (userAuth.email==="ernesttan1976@gmail.com" ? "Admin":"Instructor")
+      }
+      //console.log("newUserData", newUserData)
+      const newUser = await User.create(newUserData);
+      //console.log("NewUser=>", newUser)
+      res.status(200).json(newUserData);
+
+    } else {
+      //console.log("User found=>", user)
+      res.status(200).json(user);
+    }
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -203,6 +233,7 @@ module.exports = {
   seed,
   index,
   show,
+  getUser,
   delete: deleteUser,
   update,
 };

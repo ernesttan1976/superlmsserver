@@ -7,6 +7,7 @@ router.post("/", userController.create);
 router.post("/login", userController.login);
 router.get("/seed", userController.seed);
 router.get("/:id", userController.show);
+router.post("/email", userController.getUser);
 router.delete("/:id", userController.delete);
 router.put("/:id", userController.update);
 

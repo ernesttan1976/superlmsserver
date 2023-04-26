@@ -90,7 +90,7 @@ app.use(optionsMiddleware);
 app.use("/users", userRouter);
 app.use("/courses", courseRouter);
 app.use("/completions", completionRouter);
-app.use("/openai", openaiRouter);
+app.use("/messages", openaiRouter);
 app.use('/media', s3Router);
 
 

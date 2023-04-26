@@ -19,7 +19,6 @@ const usersSchema = new Schema(
       unique: true,
       trim: true,
       minLength: 5,
-      required: true,
     },
     role: {
       type: String,

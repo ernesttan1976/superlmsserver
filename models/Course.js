@@ -4,13 +4,15 @@ const User = require('./User');
 
 const discussionSchema = new Schema(
   {
-    discussion: {
+    text: {
       type: String,
       trim: true,
     },
-    user_id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
+    name: {
+      type: String,
+    },
+    avatar: {
+      type: String,
     },
   },
   {

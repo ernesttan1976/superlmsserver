@@ -1,42 +1,66 @@
-//prompt: string | Required
-//A text description of the desired image(s). The maximum length is 1000 characters.
+const axios = require('axios')
+const Course = require("../models/Course");
+// const User = require('../models/User');
 
-//n: integer | Optional | Defaults to 1 | The number of images to generate. Must be between 1 and 10.
-
-//size | string | Optional | Defaults to 1024x1024
-//The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-
-//response_format: string | Optional | Defaults to url
-//The format in which the generated images are returned. Must be one of url or b64_json.
-
-//user: string | Optional
-//A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. Learn more.
-
-const imageCreate = async (req, res)=>{
-
+const getMessages = async (req, res) => {
   try {
+    const course_id = req.params.id;
+    const foundCourse = Course.findById(course_id).populate('discussions_id');
+    console.log(foundCourse.discussions_id)
+    res.status(200).json(foundCourse.discussions_id);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
 
-    const { Configuration, OpenAIApi } = require("openai");
-    const configuration = new Configuration({
-      organization: "org-JhcXmE8ULjmcbXBKEiyQSEr8",
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = await new OpenAIApi(configuration);
+// Create a new message
+const postMessage = async (req, res) => {
+  try {
+    const course_id = req.params.id;
+    const foundCourse = await Course.findByIdAndUpdate(course_id).populate('discussions_id');
 
-    const {prompt, n, size, response_format, user}=req.body;
-    console.log(req.body)
-
-    const response = await openai.createImage(req.body);
-  
-  
-    res.status(200).json(response);
-  } catch (error){
+    //res.status(200).json(foundCourse.discussions_id);
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 
-
 }
 
+// Send message to OpenAI's GPT-3 API
+const postMessageToBot = (req, res) => {
+  const course_id = req.params.id;
+
+
+  const { message, numTokens } = req.body;
+  const prompt = `As a [topic:'Typescript'] expert, [context:'https://www.typescriptlang.org/docs/'] question [question:'${message}']`;
+
+  axios.post('https://api.openai.com/v1/engine/davinci-codex/completions', {
+    prompt: prompt,
+    max_tokens: numTokens,
+    n: 1,
+    stop: ['\n'],
+    temperature: 0.5,
+    frequency_penalty: 0.5,
+    presence_penalty: 0.5,
+    model: 'davinci-codex'
+  }, {
+    headers: {
+      'Authorization': `Bearer ${process.env.OPEN_API_SECRET}`,
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => {
+      const text = response.data.choices[0].text;
+      res.json(text);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({ message: 'Error generating response from bot' });
+    });
+};
+
 module.exports = {
-  imageCreate,
+  postMessage,
+  getMessages,
+  postMessageToBot
 };
