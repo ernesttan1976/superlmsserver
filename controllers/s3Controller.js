@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const { nanoid } = require("nanoid");
+// const { nanoid } = require("nanoid");
 const { readFileSync } = require("fs");
 
 // const stripe = require("stripe")(process.env.STRIPE_SECRET);
@@ -23,7 +23,7 @@ const uploadVideo = async (req, res) => {
     // video params
     const params = {
       Bucket: bucketName,
-      Key: `${nanoid()}.${video.type.split("/")[1]}`,
+      Key: `Matth.random(1000).${video.type.split("/")[1]}`,
       Body: readFileSync(video.path),
       ACL: "public-read",
       ContentType: video.type,
