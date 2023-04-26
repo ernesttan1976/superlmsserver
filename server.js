@@ -67,7 +67,7 @@ const corsOptions = {
 function optionsMiddleware(req, res, next) {
   if (req.method === "OPTIONS" && (req.path === "/users" || req.path === "/courses" || req.path=== "/media/video-upload" || req.path.startsWith("/messages"))) {
     res.set({
-      "Access-Control-Allow-Origin' : "https://superlms.vercel.app, http://localhost:3000",
+      "Access-Control-Allow-Origin" : "https://superlms.vercel.app, http://localhost:3000",
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       ...corsOptions,
