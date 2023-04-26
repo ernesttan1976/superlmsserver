@@ -188,7 +188,8 @@ const getUser = async (req, res) => {
   try {
     //console.log("GetUser=>", req.body)
     const userAuth = {...req.body};
-    const user = await User.findOne({ email: req.body.email }).populate("courses_id");
+    const users = await User.find({ email: req.body.email }).populate("courses_id");
+    
 
     if (!user && userAuth.name) {
       //console.log("User not found, creating user")
@@ -227,6 +228,19 @@ const update = async (req, res) => {
   }
 };
 
+const enroll = async (req, res) => {
+  try {
+    console.log(req.body, req.params.id)
+    const updatedUser = await User.findById(req.params.id)
+    const newCourses_id = [...updatedUser.courses_id._id, ...req.body.courses_id.id];
+    updatedUser.courses_id = [...newCourses_id];
+    updatedUser.save()
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   create,
   login,
@@ -236,4 +250,5 @@ module.exports = {
   getUser,
   delete: deleteUser,
   update,
+  enroll,
 };

@@ -2,8 +2,14 @@ const openaiController = require("../controllers/openaiController");
 const express = require("express");
 const router = express.Router();
 
-router.get("/:id", openaiController.getMessages);
-router.post("/:id", openaiController.postMessage);
-router.post("/openai/:id", openaiController.postMessageToBot);
+function noCache(req, res, next) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+}
+router.get("/:id", noCache, openaiController.getMessages);
+router.post("/:id", noCache, openaiController.postMessage);
+router.post("/openai/:id", noCache, openaiController.postMessageToBot);
 
 module.exports = router;

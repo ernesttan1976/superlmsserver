@@ -5,6 +5,7 @@ const cors = require('cors');
 const fileupload = require("express-fileupload");
 
 require("dotenv").config();
+
 const database = require("./config/database");
 database.connect();
 
@@ -64,19 +65,11 @@ const corsOptions = {
 };
 
 function optionsMiddleware(req, res, next) {
-  if (req.method === "OPTIONS" && (req.path === "/users" || req.path === "/courses")) {
+  if (req.method === "OPTIONS" && (req.path === "/users" || req.path === "/courses" || req.path=== "/media/video-upload" || req.path.startsWith("/messages"))) {
     res.set({
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      ...corsOptions,
-    });
-    res.status(204).end();
-  } else if (req.method === "OPTIONS" && req.path === "/media/video-upload") {
-    res.set({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': "GET, POST, PUT, PATCH, DELETE",
-      'Access-Control-Allow-Headers': "Content-Type, Authorization",
       ...corsOptions,
     });
     res.status(204).end();
