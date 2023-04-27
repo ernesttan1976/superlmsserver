@@ -59,7 +59,7 @@ const index = async (req, res) => {
 
           console.log("total, previousPage, nextPage", total, previousPage, nextPage)
           res.status(200).json(foundCourses);
-        })
+        })   
         .catch(error => {
           res.status(400).json({ error: error.message });
         })
@@ -150,6 +150,21 @@ const show = async (req, res) => {
   }
 };
 
+const showNoCache = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+    .populate('instructor_id')
+    .populate('students_id')
+    .populate('lessons_id')
+    .populate('discussions_id')
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).json(course);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
 const update = async (req, res) => {
   try {
     const updatedCourse = await Course.findByIdAndUpdate(
@@ -221,6 +236,7 @@ module.exports = {
   index,
   delete: deleteCourse,
   show,
+  showNoCache,
   update,
   updatePatch,
 };

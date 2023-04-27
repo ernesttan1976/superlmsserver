@@ -2,7 +2,8 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 const cors = require('cors');
-const fileupload = require("express-fileupload");
+const fs = require('fs');
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
 require("dotenv").config();
 
@@ -21,15 +22,11 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(logger("dev"));
+app.use(logger('combined', { stream: accessLogStream }));
+//app.use(logger("dev"));
 app.use(cors({
   exposedHeaders: ['x-total-count', 'nextPage', 'previousPage']
 }));
-app.use(
-  fileupload({
-    createParentPath: true,
-  }),
-);
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true }));
 // app.use(express.static(path.join(__dirname, "dist")));
@@ -85,7 +82,6 @@ app.use("/courses", courseRouter);
 app.use("/completions", completionRouter);
 app.use("/messages", openaiRouter);
 app.use('/media', s3Router);
-
 
 
 // app.get("/*", function (req, res) {
