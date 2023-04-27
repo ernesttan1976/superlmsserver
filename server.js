@@ -2,8 +2,6 @@ const express = require("express");
 const path = require("path");
 const logger = require("morgan");
 const cors = require('cors');
-const fs = require('fs');
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 
 require("dotenv").config();
 
@@ -22,8 +20,7 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(logger('combined', { stream: accessLogStream }));
-//app.use(logger("dev"));
+app.use(logger("dev"));
 app.use(cors({
   exposedHeaders: ['x-total-count', 'nextPage', 'previousPage']
 }));
