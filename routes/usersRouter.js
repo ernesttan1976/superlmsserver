@@ -10,6 +10,6 @@ router.get("/:id", userController.show);
 router.post("/email", userController.getUser);
 router.delete("/:id", userController.delete);
 router.put("/:id", userController.update);
-router.patch("/enroll/:id", userController.enroll);
+router.patch("/enroll", userController.enroll);
 
 module.exports = router;

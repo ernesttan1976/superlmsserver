@@ -10,6 +10,7 @@ const index = async (req, res) => {
     const { _start, _end, idArray } = req.query;
     if (idArray) {
       Course.find({ _id: { $in: idArray } })
+        .populate('image')  
         .populate('instructor_id')
         .populate('students_id')
         .populate('lessons_id')
@@ -39,6 +40,7 @@ const index = async (req, res) => {
 
       const { page, limit } = convert(_start, _end);
       Course.find({}).skip(page).limit(limit)
+        .populate('image') 
         .populate('instructor_id')
         .populate('students_id')
         .populate('lessons_id')
@@ -65,6 +67,7 @@ const index = async (req, res) => {
         })
     } else {
       const foundCourses = await Course.find({})
+        .populate('image') 
         .populate('instructor_id')
         .populate('students_id')
         .populate('lessons_id')
@@ -140,6 +143,7 @@ const deleteCourse = async (req, res) => {
 const show = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
+    .populate('image') 
     .populate('instructor_id')
     .populate('students_id')
     .populate('lessons_id')
@@ -153,6 +157,7 @@ const show = async (req, res) => {
 const showNoCache = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id)
+    .populate('image') 
     .populate('instructor_id')
     .populate('students_id')
     .populate('lessons_id')
@@ -206,7 +211,7 @@ const updatePatch = async (req, res) => {
       updatedCourse.description = req.body.description || updatedCourse.description;
       updatedCourse.startDate = req.body.startDate || updatedCourse.startDate;
       updatedCourse.endDate = req.body.endDate || updatedCourse.endDate;
-      updatedCourse.image = req.body.image || updatedCourse.image;
+      updatedCourse.image = [...req.body.image] || [...updatedCourse.image];
       updatedCourse.instructor_id = req.body.instructor_id || updatedCourse.instructor_id;
       
       const updatedCourse2 = await Course.findByIdAndUpdate(req.params.id, updatedCourse)

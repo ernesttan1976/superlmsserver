@@ -2,7 +2,13 @@ const coursesSeed = [
 {
     "title": "Typescript by Web Dev Simplified",
     "description": "15 Youtube Videos Series on Typescript",
-    "image": "https://i.ytimg.com/vi/jBmrduvKl5w/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAlV5w49TUHYevR-hne7kUvjHrxzw",
+    "image": [{
+        "name": "",
+        "url": "https://i.ytimg.com/vi/jBmrduvKl5w/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLAlV5w49TUHYevR-hne7kUvjHrxzw",
+        "size": 0,
+        "key": "",
+        "uid": "",
+    }],
     "startDate": new Date('2022-03-24T00:00:00'),
     "endDate": new Date('2099-03-24T00:00:00'),
     "price" : "15.98",
@@ -119,7 +125,13 @@ const coursesSeed = [
 {
 "title": "Next.js Tutorial for Beginners by Dave Gray",
 "description": "9 Youtube Videos Series on Next.js",
-"image": "https://i.ytimg.com/vi/6h649f2fB9Q/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLBKt2MBs1wWUJD2-BUyHdrJwwhv2g",
+"image": [{
+    "name": "",
+    "url": "https://i.ytimg.com/vi/6h649f2fB9Q/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLBKt2MBs1wWUJD2-BUyHdrJwwhv2g",
+    "size": 0,
+    "key": "",
+    "uid": "",
+}],
 "startDate": new Date('2023-01-17T00:00:00'),
 "endDate": new Date('2099-01-17T00:00:00'),
 "price" : "24.98",
@@ -192,7 +204,13 @@ const coursesSeed = [
 {
     "title": "React Hooks by Web Dev Simplified",
     "description": "16 Youtube Videos Series on React Hooks",
-    "image": "https://i.ytimg.com/vi/O6P86uwfdR0/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLCjFfkCaia8DcMnohwQGVE9KfbciQ",
+    "image": [{
+        "name": "",
+        "url": "https://i.ytimg.com/vi/O6P86uwfdR0/hqdefault.jpg?sqp=-oaymwEbCKgBEF5IVfKriqkDDggBFQAAiEIYAXABwAEG&rs=AOn4CLCjFfkCaia8DcMnohwQGVE9KfbciQ",
+        "size": 0,
+        "key": "",
+        "uid": "",
+    }],
     "startDate": new Date('2020-04-06T00:00:00'),
     "endDate": new Date('2099-04-06T00:00:00'),
     "price" : "19.98",

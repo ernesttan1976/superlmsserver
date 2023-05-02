@@ -8,6 +8,27 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+//special axios with exponential backoff
+const axiosInstance = axios.create({
+  // Set a maximum of 5 retries
+  retry: { retries: 5 },
+
+  // Set the delay between retries to be an exponential function
+  retryDelay: (retryCount) => {
+    const delay = Math.pow(2, retryCount) * 100;
+    return delay;
+  }
+});
+
+//usage of exponential backoff
+// axiosInstance.get('https://example.com/api/data')
+//   .then((response) => {
+//     console.log(response.data);
+//   })
+//   .catch((error) => {
+//     console.error(error);
+//   });
+
 const getMessages = async (req, res) => {
   try {
     const course_id = req.params.id;
@@ -49,7 +70,7 @@ const postMessageToBot = async (req, res) => {
       'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
     };
 
-    const tokenLength = prompt.length / 2;
+    const tokenLength = Math.floor(prompt.length / 2);
     
     const data = {
       prompt: prompt,
@@ -62,11 +83,16 @@ const postMessageToBot = async (req, res) => {
       model: 'text-davinci-003'
     };
     
-    const response = await axios.post('https://api.openai.com/v1/completions', data, { headers });
-    
-    const completion = response.data.choices[0].text;
+    const response = await axiosInstance.post('https://api.openai.com/v1/completions', data, { headers });
+    console.log(response)
+    let completion = response.data.choices[0].text;
 
     console.log(completion)
+
+    if (!completion) {
+         completion ="There was no reply from OpenAI";
+         return;
+    }
 
     const message = {
       text: completion,

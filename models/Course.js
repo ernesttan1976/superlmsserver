@@ -56,18 +56,12 @@ const lessonSchema = new Schema(
   { timestamps: true }
 );
 
-const coursesSchema = new Schema(
+const imagesSchema = new Schema(
   {
-    title: {
-      type: String,
-      required: true
-    },
-
-    description: {
+    name: {
       type: String,
     },
-
-    image: {
+    url: {
       type: String,
       validate: {
         validator: function (value) {
@@ -78,12 +72,32 @@ const coursesSchema = new Schema(
         message: "Please provide a valid image URL",
       },
     },
+    size: {
+      type: Number,
+    },
+    key: {
+      type: String,
+    },
+    uid: {
+      type: String,
+    },
+  }
+)
 
+const coursesSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+    },
+    image: [imagesSchema],
     startDate: {
       type: Date,
       required: true,
     },
-
     endDate: {
       type: Date,
       validate: {
@@ -93,13 +107,12 @@ const coursesSchema = new Schema(
         message: "End date must be after start date",
       },
     },
-
     price: {
       type: Number,
       get: (v) => parseFloat(v).toFixed(2),
       set: (v) => parseFloat(v).toFixed(2)
     },
-
+ 
     instructor_id: {
       type: Schema.Types.ObjectId,
       ref: "User",

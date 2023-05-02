@@ -1,8 +1,9 @@
 const AWS = require("aws-sdk");
-const { shortid } = require("shortid");
-const { readFileSync } =require("fs");
+const shortid = require("shortid");
+const { readFileSync } = require("fs");
+const fs = require('fs');
 
-const AWS_BUCKET_NAME = "arn:aws:s3:::ernest-ga-app-bucket-1"
+const AWS_BUCKET_NAME = "ernest-ga-app-bucket-1"
 
 const awsConfig = {
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -14,26 +15,20 @@ const awsConfig = {
 const S3 = new AWS.S3(awsConfig);
 
 const uploadImage = async (req, res) => {
-  // console.log(req.body);
   try {
-    const { image } = req.body;
+    const image = req.files.file.path;
     if (!image) return res.status(400).send("No image");
 
-    // prepare the image
-    const base64Data = new Buffer.from(
-      image.replace(/^data:image\/\w+;base64,/, ""),
-      "base64"
-    );
-
-    const type = image.split(";")[0].split("/")[1];
+    const type = req.files.file.type.split('/')[1];
+    if (!type) {
+      return res.status(400).send("Invalid image format");
+    }
 
     // image params
     const params = {
       Bucket: AWS_BUCKET_NAME,
       Key: `${shortid()}.${type}`,
-      Body: base64Data,
-      ACL: "public-read",
-      ContentEncoding: "base64",
+      Body: fs.createReadStream(image),
       ContentType: `image/${type}`,
     };
 
@@ -43,8 +38,18 @@ const uploadImage = async (req, res) => {
         console.log(err);
         return res.sendStatus(400);
       }
-      console.log(data);
-      res.send(data);
+
+      // const responseFromDemo = {
+      //   "url": "https://refine.ams3.digitaloceanspaces.com/demo/1682977660962-SuperLMSLogo.png"
+      // }
+    fileData = {
+      name: req.files.file.name,
+      url: data.Location,
+      size: req.files.file.size,
+      key: data.Key,
+    }
+      console.log("fileData=>",fileData);
+      res.send(fileData);
     });
   } catch (err) {
     console.log(err);
@@ -53,11 +58,11 @@ const uploadImage = async (req, res) => {
 
 const removeImage = async (req, res) => {
   try {
-    const { image } = req.body;
+    const key = req.params.key;
     // image params
     const params = {
-      Bucket: image.Bucket,
-      Key: image.Key,
+      Bucket: AWS_BUCKET_NAME,
+      Key: key,
     };
 
     // send remove request to s3

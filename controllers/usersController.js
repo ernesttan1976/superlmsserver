@@ -230,9 +230,10 @@ const update = async (req, res) => {
 
 const enroll = async (req, res) => {
   try {
-    console.log(req.body, req.params.id)
-    const updatedUser = await User.findById(req.params.id)
-    const newCourses_id = [...updatedUser.courses_id._id, ...req.body.courses_id.id];
+    console.log("req.body=>", req.body)
+    const {user, courses_id} = req.body;
+    const updatedUser = await User.findOne({name: user.name})
+    const newCourses_id = [...updatedUser.courses_id._id, ...courses_id];
     updatedUser.courses_id = [...newCourses_id];
     updatedUser.save()
     res.status(200).json(updatedUser);
