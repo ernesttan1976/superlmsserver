@@ -329,6 +329,22 @@ const coursesSeed = [
         },
     ],
 },
+{
+    "_id": "645e3627be9c3e378c76495f",
+    "title": "AI Powered Chat",
+    "description": "Please use this chat to ask questions",
+    "image": [{
+        "name": "",
+        "url": "/openai.gif",
+        "size": 0,
+        "key": "",
+        "uid": "",
+    }],
+    "startDate": new Date('2022-03-24T00:00:00'),
+    "endDate": new Date('2099-03-24T00:00:00'),
+    "price" : "0",
+    "lessons_id":[],
+},
 ]
 
 module.exports = coursesSeed;

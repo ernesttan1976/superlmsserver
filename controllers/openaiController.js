@@ -2,8 +2,10 @@ const axios = require('axios')
 const Course = require("../models/Course");
 // const User = require('../models/User');
 const { Configuration, OpenAIApi } = require("openai");
+const axiosRetry = require('axios-retry');
+
 const configuration = new Configuration({
-  organization: "org-JhcXmE8ULjmcbXBKEiyQSEr8",
+  organization: process.env.OPENAI_ORG_ID,
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
@@ -11,7 +13,7 @@ const openai = new OpenAIApi(configuration);
 //special axios with exponential backoff
 const axiosInstance = axios.create({
   // Set a maximum of 5 retries
-  retry: { retries: 5 },
+  retry: { retries: 3 },
 
   // Set the delay between retries to be an exponential function
   retryDelay: (retryCount) => {
@@ -20,14 +22,10 @@ const axiosInstance = axios.create({
   }
 });
 
-//usage of exponential backoff
-// axiosInstance.get('https://example.com/api/data')
-//   .then((response) => {
-//     console.log(response.data);
-//   })
-//   .catch((error) => {
-//     console.error(error);
-//   });
+
+// Apply the retry configuration to the axios instance
+axiosRetry(axiosInstance, { retries: 3 });
+
 
 const getMessages = async (req, res) => {
   try {
@@ -63,7 +61,12 @@ const postMessageToBot = async (req, res) => {
   try {
     const course_id = req.params.id;
     const { text, context, numTokens } = req.body;
-    const prompt = `As a expert in ${context}, ${text}`;
+    let prompt;
+    if (context === "AI Powered Chat"){
+      prompt = `${text}`;
+    } else {
+     prompt = `As a expert in ${context}, ${text}`;
+    }
 
     const headers = {
       'Content-Type': 'application/json',
@@ -74,9 +77,9 @@ const postMessageToBot = async (req, res) => {
     
     const data = {
       prompt: prompt,
-      max_tokens: tokenLength,
+      max_tokens: tokenLength*2,
       n: 1,
-      stop: ['\n'],
+      // stop: ['\n'],
       temperature: 0.5,
       frequency_penalty: 0.5,
       presence_penalty: 0.5,
@@ -84,20 +87,20 @@ const postMessageToBot = async (req, res) => {
     };
     
     const response = await axiosInstance.post('https://api.openai.com/v1/completions', data, { headers });
-    console.log(response)
-    let completion = response.data.choices[0].text;
-
-    console.log(completion)
-
-    if (!completion) {
-         completion ="There was no reply from OpenAI";
-         return;
+    console.log("response=>",response)
+    let completion;
+    if (response.data.choices && response.data.choices.length > 0) {
+        completion = response.data.choices[0].text;
+        console.log("completion=>", completion)
+    } else {
+        completion ="There was no reply from OpenAI";
+        console.log("There was no reply from OpenAI");
     }
 
     const message = {
-      text: completion,
+      text: JSON.stringify(completion),
       name: "@super",
-      avatar: "favicon-32x32.png"
+      avatar: "/favicon-32x32.png"
     };
     
     const foundCourse = await Course.findById(course_id).populate('discussions_id');

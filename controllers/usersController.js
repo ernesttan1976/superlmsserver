@@ -76,6 +76,15 @@ const seed = async (req, res) => {
     });
     userItems.push(adminUser);
 
+    const adminUser2 = new User({
+      name: `Ernest Tan`,
+      email: `ernesttan1976@gmail.com`,
+      password: await bcrypt.hash(`admin`, SALT_ROUNDS),
+      role: 'Admin',
+      avatar: RandomAvatar(),
+    });
+    userItems.push(adminUser2);
+
     for (let i = 1; i < 6; i++) {
       const instructorUser = new User({
         name: `${faker.name.firstName()} ${faker.name.lastName()}`,
@@ -188,7 +197,7 @@ const getUser = async (req, res) => {
   try {
     //console.log("GetUser=>", req.body)
     const userAuth = {...req.body};
-    const users = await User.find({ email: req.body.email }).populate("courses_id");
+    const user = await User.findOne({ email: req.body.email }).populate("courses_id");
     
 
     if (!user && userAuth.name) {
@@ -230,12 +239,21 @@ const update = async (req, res) => {
 
 const enroll = async (req, res) => {
   try {
-    console.log("req.body=>", req.body)
+    //console.log("req.body=>", req.body)
     const {user, courses_id} = req.body;
-    const updatedUser = await User.findOne({name: user.name})
-    const newCourses_id = [...updatedUser.courses_id._id, ...courses_id];
+    const updatedUser = await User.findOne({email: user.email})
+    //console.log("User found?:",{...updatedUser})
+    let newCourses_id=[];
+    if (updatedUser.courses_id.length>0){
+      newCourses_id = [...updatedUser.courses_id, ...courses_id];
+    } else {
+      //console.log(courses_id);
+      newCourses_id = [...courses_id];
+    }
+    //console.log("newCourses_id:", newCourses_id)
     updatedUser.courses_id = [...newCourses_id];
     updatedUser.save()
+    //console.log("Saved:",{...updatedUser})
     res.status(200).json(updatedUser);
   } catch (error) {
     res.status(400).json({ error: error.message });

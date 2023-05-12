@@ -124,7 +124,7 @@ const seed = async (req, res) => {
 
     const finalCourses = await Course.find({});
     const finalUsers = await User.find({});
-    console.log({ finalCourses, finalUsers });
+    //console.log({ finalCourses, finalUsers });
     res.status(200).json({ finalCourses, finalUsers });
   } catch (error) {
     res.status(400).json({ error: error.message });
