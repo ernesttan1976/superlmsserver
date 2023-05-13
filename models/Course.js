@@ -6,7 +6,6 @@ const discussionSchema = new Schema(
   {
     text: {
       type: String,
-      trim: true,
     },
     name: {
       type: String,

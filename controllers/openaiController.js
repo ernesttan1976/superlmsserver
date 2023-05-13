@@ -115,8 +115,90 @@ const postMessageToBot = async (req, res) => {
   }
 };
 
+const postMessageToBotVer2 = async (req, res) => {
+  try {
+    const course_id = req.params.id;
+    const { text, context, numTokens } = req.body;
+    let prompt;
+    if (context === "AI Powered Chat"){
+      prompt = `${text}`;
+    } else {
+     prompt = `As a expert in ${context}, ${text}`;
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+    };
+
+    const tokenLength = Math.floor(prompt.length / 2);
+    
+    const data = {
+      messages: [{"role": "user", "content": prompt}],
+      model: "gpt-3.5-turbo",
+      max_tokens: numTokens,
+      temperature: 0.2,
+      top_p: 0.5,
+    };
+    
+    const response = await openai.createChatCompletion(data);
+    console.log("response=>",response)
+    let completion;
+    if (response.data.choices && response.data.choices.length > 0) {
+        completion = response.data.choices[0].message.content;
+        console.log("response.data.choices[0].message.content", response.data.choices[0].message.content)
+        console.log("response.data.choices[0].message.content", {...response.data.choices[0].message})
+    } else {
+        completion ="There was no reply from OpenAI";
+        console.log("There was no reply from OpenAI");
+    }
+
+    const message = {
+      text: completion,
+      name: "@super",
+      avatar: "/favicon-32x32.png"
+    };
+    
+    const foundCourse = await Course.findById(course_id).populate('discussions_id');
+    foundCourse.discussions_id.push(message);
+    await foundCourse.save();
+    
+    res.status(200).json({ success: true, message: message.text });
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error generating response from bot' });
+  }
+};
+
+function formatText(text) {
+  const codeMarker = '```';
+
+  if (text.includes(codeMarker)) {
+    let formattedText = '';
+    const sections = text.split(codeMarker);
+
+    for (let i = 0; i < sections.length; i++) {
+      if (i % 2 === 1) {
+        formattedText += `<pre>${sections[i]}</pre>`;
+      } else {
+        formattedText += sections[i].replace(/\n/g, '<br>');
+      }
+    }
+
+    return formattedText;
+  } else {
+    return text.replace(/\n/g, '<br>');
+  }
+}
+
+
+
 module.exports = {
   postMessage,
   getMessages,
-  postMessageToBot
+  postMessageToBot,
+  postMessageToBotVer2
 };
+
+

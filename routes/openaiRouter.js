@@ -10,6 +10,6 @@ function noCache(req, res, next) {
 }
 router.get("/:id", noCache, openaiController.getMessages);
 router.post("/:id", noCache, openaiController.postMessage);
-router.post("/openai/:id", noCache, openaiController.postMessageToBot);
+router.post("/openai/:id", noCache, openaiController.postMessageToBotVer2);
 
 module.exports = router;
